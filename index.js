@@ -2,7 +2,7 @@
 
 require('dotenv').config()
 
-let playwright = require(playwright);
+let playwright = require("playwright");
 
 
 const netID = process.env.NETID;
