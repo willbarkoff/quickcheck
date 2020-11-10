@@ -3,9 +3,11 @@
   "description": "The Daily Check, but quick",
   "repository": {
     "type": "git",
-    "url": "https://github.com/willbarkoff/quickcheck"
+    "url": "https://github.com/willbarkoff/quickcheck.git"
   },
-  "bin": "index.js",
+  "bin": {
+    "quickcheck": "index.js"
+  },
   "version": "0.1.1",
   "main": "index.js",
   "license": "MIT",
