@@ -7,8 +7,8 @@ Quick Check is a program to run the Daily Check for you! It does it quickly (usu
 Install it with `npm` or `yarn`. If you don't have either installed, you can install `npm` by downloading Node.js, which can be done [here](https://nodejs.org/en/).
 
 ```shell
-$ npm i -g quickcheck
-$ yarn global add quickcheck
+$ npm i -g cu-quickcheck
+$ yarn global add cu-quickcheck
 ```
 
 Note that Quick Check installs an instance of Firefox, which does take up a bit of space (about 187 MB). You can look into alternate options on [this page](https://playwright.dev/#?path=docs/installation.md). Note that only Firefox is officially supported, and your mileage may vary with other browsers.
