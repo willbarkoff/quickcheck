@@ -1,5 +1,11 @@
 {
   "name": "cu-quickcheck",
+  "description": "The Daily Check, but quick",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/willbarkoff/quickcheck"
+  },
+  "bin": "index.js",
   "version": "0.1.0",
   "main": "index.js",
   "license": "MIT",
