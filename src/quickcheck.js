@@ -2,7 +2,6 @@ import Listr from "listr"
 import playwright from "playwright-firefox"
 import fs from 'fs'
 import untildify from 'untildify'
-import { time } from "console";
 
 export default async function quickcheck() {
 	let browser;
@@ -106,7 +105,12 @@ export default async function quickcheck() {
 			}
 		}
 	])
-	listr.run();
+
+	try {
+		await listr.run();
+	} catch {
+		process.exit(1);
+	}
 	// const browser = await playwright['firefox'].launch({ headless: false });
 	// const page = await context.newPage();
 	// daily check loaded! Let's begin the speedrun!
