@@ -2,6 +2,7 @@ import Listr from "listr"
 import playwright from "playwright-firefox"
 import fs from 'fs'
 import untildify from 'untildify'
+import { defaultSettings } from "./configure";
 
 export default async function quickcheck() {
 	let browser;
@@ -14,13 +15,15 @@ export default async function quickcheck() {
 			title: "Loading configuration",
 			task: async (ctx, task) => {
 				config = JSON.parse(fs.readFileSync(untildify("~/.quickcheck.json"), { encoding: "utf8" }))
-				task.output = config.login.netID
+				if (!config.settings) {
+					config.settings = defaultSettings;
+				}
 			},
 		},
 		{
 			title: "Launching browser",
 			task: async (ctx, task) => {
-				browser = await playwright['firefox'].launch({ headless: false });
+				browser = await playwright['firefox'].launch({ headless: config.settings.headless });
 				context = await browser.newContext();
 			},
 		},
@@ -51,7 +54,7 @@ export default async function quickcheck() {
 			title: "Completing Daily Check",
 			task: async (ctx, task) => {
 				try {
-					await page.click("#continue", { timeout: 1500 });
+					await page.click("#continue", { timeout: config.settings.timeout });
 				} catch {
 					throw new Error("It looks like you already completed the Daily Check");
 				}
@@ -85,7 +88,7 @@ export default async function quickcheck() {
 		{
 			title: "Submitting Daily Check",
 			task: async (ctx, task) => {
-				await sleep(1000)
+				await sleep(config.settings.timeout)
 				await page.click("#submit")
 				await page.click("#submit")
 			}
@@ -102,7 +105,7 @@ export default async function quickcheck() {
 			title: "Closing browser",
 			task: async (ctx, task) => {
 				await browser.close();
-			}
+			},
 		}
 	])
 

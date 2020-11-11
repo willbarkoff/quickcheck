@@ -3,6 +3,11 @@ import c from 'ansi-colors'
 import fs from 'fs'
 import untildify from 'untildify'
 
+export const defaultSettings = {
+	timeout: 1000,
+	headless: false
+}
+
 export default async function configure() {
 	console.log(c.bold("First, let's get some information about you."))
 	console.log(c.gray(`${c.bold.underline("Psst!")} Don't worry, none of this information will leave your computer.`))
@@ -103,12 +108,42 @@ export default async function configure() {
 		return;
 	}
 
+	console.log(c.bold("\nNow to the fun stuff!"))
+	console.log(c.gray(`These settings can be changed at any time.`))
+	let promptAdvanced = await inquirer.prompt([
+		{
+			type: "confirm",
+			name: "correct",
+			message: "Do you want to configure any advanced options?"
+		}
+	])
+
+	let advancedResponses = defaultSettings;
+
+	if (promptAdvanced) {
+		advancedResponses = await inquirer.prompt([
+			{
+				type: "number",
+				default: advancedResponses.timeout,
+				name: "timeout",
+				message: "How long should Quick Check wait for the CAPTCHA timeout (ms)?"
+			},
+			{
+				type: "confirm",
+				default: false,
+				name: "headless",
+				message: "Should Quick Check run headlessly? This is faster, but less fun."
+			}
+		])
+	}
+
 	console.log(c.bold("\nAwesome! I'm saving your settings now."))
 	console.log(c.gray(`They'll be saved in the file ~/.quickcheck.json`))
 
 	let configData = {
 		login: personal,
-		dailyCheck: dailyCheck
+		dailyCheck: dailyCheck,
+		settings: advancedResponses
 	}
 
 	try {
