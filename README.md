@@ -13,24 +13,31 @@ $ yarn global add cu-quickcheck
 
 Note that Quick Check installs an instance of Firefox, which does take up a bit of space (about 187 MB). You can look into alternate options on [this page](https://playwright.dev/#?path=docs/installation.md). Note that only Firefox is officially supported, and your mileage may vary with other browsers.
 
-⚠️ As of right now, Quick Check assumes that you **have never been diagnosed with COVID-19**, **you are not experiencing any COVID-19 symptoms**, and that **you have not been in close contact with anyone experiencing COVID-19 symptoms or who has tested positive for COVID-19**. If any of these statements are not true for you, **please do not use Quick Check at this time**.
+You can then configure Quick Check with the `configure` flag. The configuration file will be stored at `~/.quickcheck.json`.
+```shell
+$ quickcheck --configure
+```
 
 ## Running Quick Check
 
-Quick Check takes two environment variables when it's run, `NETID` and `NETID_PASSWORD`. Quick Check also supports `.env` files, meaning you can create a `.env` file to more easily manage your environment variables. Note that the `.env` file must be located in the same director that you run Quick Check from.
-
+Quick Check reads in from its configuration file located at `~/.quickcheck.json`. You can generate a configuration file with `quickcheck --configure`.
 Quick Check takes no arguments as of right now.
+
 ```shell
+$ quickcheck --configure # sets up quickcheck
 $ quickcheck # runs quickcheck
-$ NETID=ab123 NETID_PASSWORD=superSecret1 quickcheck # runs quickcheck with a given netID and password
-$ echo 'NETID=ab123' >> .env
-$ echo 'NETID_PASSWORD=superSecret1' >> .env
-$ quickcheck
 ```
 
 ### Creating a Desktop Shortcut for Quick Check
 
 You can create a simple shell script to run Quick Check, then put that on your desktop, and double click it to run. Note that on macOS your file must end in `.command` for it to be run with terminal by default. Otherwise, it will open in Xcode. You can see the [run.command](./run.command) file for an example.
+
+## Project Priorities
+
+The priorities for Quick Check are as follows.
+1. **Privacy**. The Daily Check consists of personal health information, so no data should _ever_ be sent to any party other than Cornell through the daily check website.
+2. **Usability**. Quick Check should be usable by those without a strong technical background.
+3. **Speed**. We should aim for an average time of under 10 seconds to complete the daily check.
 
 ## Reporting Bugs
 

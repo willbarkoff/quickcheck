@@ -1,25 +1,126 @@
-import playwright from 'playwright-firefox'
-import dotenv from 'dotenv'
+import Listr from "listr"
+import playwright from "playwright-firefox"
+import fs from 'fs'
+import untildify from 'untildify'
+import { time } from "console";
 
-export async function cli() {
-	dotenv.config()
+export default async function quickcheck() {
 	const netID = process.env.NETID;
 	const password = process.env.NETID_PASSWORD;
+	const headless = process.env.HEADLESS
 
-	const browser = await playwright['firefox'].launch({ headless: false });
-	const context = await browser.newContext();
-	const page = await context.newPage();
-	await page.goto('https://dailycheck.cornell.edu/saml_login_user?redirect=%2Fdaily-checkin');
+	let browser;
+	let page;
+	let context;
+	let config;
+
+	const listr = new Listr([
+		{
+			title: "Loading configuration",
+			task: async (ctx, task) => {
+				config = JSON.parse(fs.readFileSync(untildify("~/.quickcheck.json"), { encoding: "utf8" }))
+				task.output = config.login.netID
+			},
+		},
+		{
+			title: "Launching browser",
+			task: async (ctx, task) => {
+				browser = await playwright['firefox'].launch({ headless: false });
+				context = await browser.newContext();
+			},
+		},
+		{
+			title: "Navigating to Daily Check",
+			task: async (ctx, task) => {
+				page = await context.newPage()
+				await page.goto('https://dailycheck.cornell.edu/saml_login_user?redirect=%2Fdaily-checkin');
+			}
+		},
+		{
+			title: "Logging in",
+			task: async (ctx, task) => {
+				await page.fill("#netid", netID);
+				await page.fill("#password", password);
+				await page.click(".input-submit");
+				try {
+					await page.waitForNavigation({
+						url: "https://dailycheck.cornell.edu/daily-checkin",
+						timeout: 3000
+					})
+				} catch {
+					task.report(new Error("Something went wrong logging in. Check to make sure your credentials are correct."))
+				}
+			}
+		},
+		{
+			title: "Completing Daily Check",
+			task: async (ctx, task) => {
+				try {
+					await page.click("#continue", { timeout: 1500 });
+				} catch {
+					throw new Error("It looks like you already completed the Daily Check");
+				}
+				await page.click(config.dailyCheck.positivetestever ? "#positivetestever-yes" : "#positivetestever-no")
+				if (config.dailyCheck.positivetestever) {
+					await page.click(`#${config.dailyCheck.positivetest}`)
+				}
+
+				await page.click(config.dailyCheck.covidsymptoms ? "#covidsymptoms-yes" : "#covidsymptoms-no")
+				if (config.dailyCheck.covidsymptoms) {
+					await page.click(config.dailyCheck.telemedvisit ? "#telemedvisit-yes" : "#telemedvisit-no")
+					if (config.dailyCheck.telemedvisit) {
+						await page.click(config.dailyCheck.symptomsworsened ? "#symptomsworsened-yes" : "#symptomsworsened-no")
+						if (!config.dailyCheck.symptomsworsened) {
+							await page.click(config.dailyCheck.cleared ? "#cleared-yes" : "#cleared-no")
+						}
+					}
+				}
+
+				await page.click(config.dailyCheck.contactdiagnosed ? "#contactdiagnosed-yes" : "#contactdiagnosed-no")
+				await page.click(config.dailyCheck.contactsymptoms ? "#contactsymptoms-yes" : "#contactsymptoms-no")
+
+				if (config.dailyCheck.contactdiagnosed || config.dailyCheck.contactsymptoms) {
+					await page.click(config.dailyCheck.contacttelemedvisit ? "#contacttelemedvisit-yes" : "#contacttelemedvisit-no")
+					if (config.dailyCheck.contacttelemedvisit) {
+						await page.click(config.dailyCheck.clearedcontact ? "#clearedcontact-yes" : "#clearedcontact-no")
+					}
+				}
+			}
+		},
+		{
+			title: "Submitting Daily Check",
+			task: async (ctx, task) => {
+				await sleep(1000)
+				await page.click("#submit")
+				await page.click("#submit")
+			}
+		},
+		{
+			title: "Taking screenshot",
+			task: async (ctx, task) => {
+				await page.waitForSelector(".messages.messages--status.mask_message")
+				await page.screenshot({ path: `dailycheck-today.png` })
+				task.output = "Screenshot saved as dailycheck-today.png";
+			}
+		},
+		{
+			title: "Closing browser",
+			task: async (ctx, task) => {
+				await browser.close();
+			}
+		}
+	])
+	listr.run();
+	// const browser = await playwright['firefox'].launch({ headless: false });
+	// const page = await context.newPage();
 	// daily check loaded! Let's begin the speedrun!
-	await page.fill("#netid", netID);
-	await page.fill("#password", password);
-	await page.click(".input-submit");
-
-	// show confirmation
-	await page.waitForNavigation({
-		url: "https://dailycheck.cornell.edu/daily-checkin"
-	})
-	await page.screenshot({ path: `dailycheck-today.png` })
-
-	await browser.close();
 }
+
+let sleep = (time) => new Promise((resolve, reject) => {
+	// We call resolve(...) when what we were doing asynchronously was successful, and reject(...) when it failed.
+	// In this example, we use setTimeout(...) to simulate async code. 
+	// In reality, you will probably be using something like XHR or an HTML5 API.
+	setTimeout(function () {
+		resolve()  // Yay! Everything went well!
+	}, time)
+}) 
