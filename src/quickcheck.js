@@ -15,7 +15,6 @@ export default async function quickcheck() {
 			title: "Loading configuration",
 			task: async (ctx, task) => {
 				config = JSON.parse(fs.readFileSync(untildify("~/.quickcheck.json"), { encoding: "utf8" }))
-				console.log(config)
 				task.output = config.login.netID
 			},
 		},
