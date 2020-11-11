@@ -108,6 +108,22 @@ export default async function configure() {
 		return;
 	}
 
+	if (
+		(dailyCheck.positivetestever && dailyCheck.positivetest == "positivetest-yes") ||
+		(dailyCheck.covidsymptoms && (!dailyCheck.telemedvisit || dailyCheck.telemedvisit && (dailyCheck.symptomsworsened || !dailyCheck.cleared))) ||
+		((dailyCheck.contactdiagnosed || dailyCheck.contactsymptoms) && (!dailyCheck.contacttelemedvisit || !dailyCheck.clearedcontact))
+	) {
+		// daily check failed
+		console.log(`\nYour check in status is ${c.red("RED")}`)
+		console.log(c.bold("Do Not Proceed to Campus."))
+		console.log(c.gray("Please contact Cornell Health at 607-255-5155."))
+	} else {
+		// daily check passed
+		console.log(`\nYour check in status is ${c.green("GREEN")}`)
+		console.log(c.bold("You May Proceed to Campus - Follow Cornell’s Face Covering Requirements."))
+		console.log(c.gray("Thank you for completing your Daily Check. You may proceed to campus. Please continue monitoring your health and follow university guidelines for social distancing and personal hygiene while on campus. If you develop symptoms while on campus, contact Cornell Health at 607-255-5155."))
+	}
+
 	console.log(c.bold("\nNow to the fun stuff!"))
 	console.log(c.gray(`These settings can be changed at any time.`))
 	let promptAdvanced = await inquirer.prompt([
