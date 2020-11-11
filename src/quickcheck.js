@@ -5,10 +5,6 @@ import untildify from 'untildify'
 import { time } from "console";
 
 export default async function quickcheck() {
-	const netID = process.env.NETID;
-	const password = process.env.NETID_PASSWORD;
-	const headless = process.env.HEADLESS
-
 	let browser;
 	let page;
 	let context;
@@ -19,6 +15,7 @@ export default async function quickcheck() {
 			title: "Loading configuration",
 			task: async (ctx, task) => {
 				config = JSON.parse(fs.readFileSync(untildify("~/.quickcheck.json"), { encoding: "utf8" }))
+				console.log(config)
 				task.output = config.login.netID
 			},
 		},
@@ -39,8 +36,8 @@ export default async function quickcheck() {
 		{
 			title: "Logging in",
 			task: async (ctx, task) => {
-				await page.fill("#netid", netID);
-				await page.fill("#password", password);
+				await page.fill("#netid", config.login.netID);
+				await page.fill("#password", config.login.password);
 				await page.click(".input-submit");
 				try {
 					await page.waitForNavigation({
