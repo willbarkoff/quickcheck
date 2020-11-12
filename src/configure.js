@@ -2,6 +2,7 @@ import inquirer from 'inquirer';
 import c from 'ansi-colors'
 import fs from 'fs'
 import untildify from 'untildify'
+import open from 'open'
 
 export const defaultSettings = {
 	timeout: 1000,
@@ -9,8 +10,53 @@ export const defaultSettings = {
 }
 
 export default async function configure() {
-	console.log(c.bold("First, let's get some information about you."))
-	console.log(c.gray(`${c.bold.underline("Psst!")} Don't worry, none of this information will leave your computer.`))
+	console.log(c.bold("First things first! Do you aggree to the terms and conditions of Quick Check?"))
+	console.log(c.gray("They're available at https://g.willbarkoff.dev/qc-terms. Note that they're subject to change at any time."))
+	let terms = await inquirer.prompt([
+		{
+			type: 'list',
+			name: 'terms',
+			message: "Do you agree to the terms and conditions of use?",
+			choices: [
+				{
+					name: "Open in browser",
+					value: "browser"
+				},
+				new inquirer.Separator(),
+				{
+					name: "Yes",
+					value: "yes"
+				},
+				{
+					name: "No",
+					value: "no"
+				},
+			]
+		}
+	])
+
+	if (terms.terms == "browser") {
+		process.stdout.write("Launching browser...")
+		try {
+			await open("https://g.willbarkoff.dev/qc-terms");
+			console.log(c.green(" Success!"))
+		} catch {
+			console.log(c.red.bold("An error occured launching the browser."))
+			console.log("Don't worry, just head over to https://g.willbarkoff.dev/qc-terms.")
+		} finally {
+			console.log(`When you get back, just run ${c.bold("quickcheck --config")} again. I'll be waiting :)`)
+			return;
+		}
+	} else if (terms.terms == "no") {
+		console.log(c.red.bold("You must accept the terms to use Quick Check."))
+		console.log(`I totally understand if you don't want to accept them now. If you do in the future, just run ${c.bold("quickcheck --config")} again and we'll get back to it.`)
+		return
+	}
+
+	let affirmationTime = new Date().getTime();
+
+	console.log(c.bold("\nOk cool! Now that that's over with, let's get some information about you."))
+	console.log(c.gray(`Don't worry, none of this information will leave your computer.`))
 	let personal = await inquirer.prompt([
 		{
 			type: 'input',
@@ -157,6 +203,7 @@ export default async function configure() {
 	console.log(c.gray(`They'll be saved in the file ~/.quickcheck.json`))
 
 	let configData = {
+		affirmationTime: affirmationTime,
 		login: personal,
 		dailyCheck: dailyCheck,
 		settings: advancedResponses

@@ -15,6 +15,9 @@ export default async function quickcheck() {
 			title: "Loading configuration",
 			task: async (ctx, task) => {
 				config = JSON.parse(fs.readFileSync(untildify("~/.quickcheck.json"), { encoding: "utf8" }))
+				if (!config.affirmationTime) {
+					throw new Error("You must accept the terms and conditions prior to using Quick Check. Run quickcheck --config to do so.")
+				}
 				if (!config.settings) {
 					config.settings = defaultSettings;
 				}
