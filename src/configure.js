@@ -11,7 +11,7 @@ export const defaultSettings = {
 
 export default async function configure() {
 	console.log(c.bold("First things first! Do you aggree to the terms and conditions of Quick Check?"))
-	console.log(c.gray("They're available at https://g.willbarkoff.dev/qc-terms. Note that they're subject to change at any time."))
+	console.log(c.gray("They're available at https://g.willbarkoff.dev/qcterms. Note that they're subject to change at any time."))
 	let terms = await inquirer.prompt([
 		{
 			type: 'list',
@@ -38,11 +38,11 @@ export default async function configure() {
 	if (terms.terms == "browser") {
 		process.stdout.write("Launching browser...")
 		try {
-			await open("https://g.willbarkoff.dev/qc-terms");
+			await open("https://g.willbarkoff.dev/qcterms");
 			console.log(c.green(" Success!"))
 		} catch {
 			console.log(c.red.bold("An error occured launching the browser."))
-			console.log("Don't worry, just head over to https://g.willbarkoff.dev/qc-terms.")
+			console.log("Don't worry, just head over to https://g.willbarkoff.dev/qcterms.")
 		} finally {
 			console.log(`When you get back, just run ${c.bold("quickcheck --config")} again. I'll be waiting :)`)
 			return;
